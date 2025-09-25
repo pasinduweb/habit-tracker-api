@@ -2,9 +2,14 @@ import { Router } from 'express';
 import { validateBody, validateParams } from '../middleware/validation.middleware.ts';
 import { z } from 'zod';
 import { authenticateToken } from '../middleware/auth.middleware.ts';
+import { createHabit } from '../controllers/habit.controller.ts';
 
 const createHabitSchema = z.object({
     name: z.string(),
+    description: z.string().optional(),
+    frequency: z.string(),
+    targetCount: z.string(),
+    tagIds: z.array(z.string()).optional(),
 });
 
 const completeParamsSchema = z.object({
@@ -23,9 +28,7 @@ router.get('/:id', (req, res) => {
     res.json({ message: 'Got one habit' });
 });
 
-router.post('/', validateBody(createHabitSchema), (req, res) => {
-    res.json({ message: 'Habit created' });
-});
+router.post('/', validateBody(createHabitSchema), createHabit);
 
 router.post('/:id/complete', validateParams(completeParamsSchema), validateBody(createHabitSchema), (req, res) => {
     res.json({ message: 'Habit completed' });
