@@ -115,3 +115,42 @@ export const updateHabit = async (req: AuthenticatedRequest, res: Response) => {
         res.status(500).json({ error: 'Failed to update habit' });
     }
 };
+
+export const getHabitById = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user!.id;
+
+        const habit = await db.query.habits.findFirst({
+            where: and(eq(habits.id, id), eq(habits.userId, userId)),
+            with: {
+                habitTags: {
+                    with: {
+                        tag: true,
+                    },
+                },
+                entries: {
+                    orderBy: [desc(entries.completionDate)],
+                    limit: 10,
+                },
+            },
+        });
+
+        if (!habit) {
+            return res.status(404).json({ error: 'Habit not found' });
+        }
+
+        const habitWithTags = {
+            ...habit,
+            tags: habit.habitTags.map((ht) => ht.tag),
+            habitTags: undefined,
+        };
+
+        res.json({
+            habit: habitWithTags,
+        });
+    } catch (error) {
+        console.error('Get habit error:', error);
+        res.status(500).json({ error: 'Failed to fetch habit' });
+    }
+};
