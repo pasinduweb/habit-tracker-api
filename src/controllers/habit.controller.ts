@@ -70,3 +70,48 @@ export const getUserHabits = async (req: AuthenticatedRequest, res: Response) =>
         res.status(500).json({ error: 'Failed to fetch habits' });
     }
 };
+
+export const updateHabit = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const id = req.params.id;
+        const { tagIds, ...updates } = req.body;
+
+        const result = await db.transaction(async (tx) => {
+            const [updatedHabit] = await tx
+                .update(habits)
+                .set({ ...updates, updatedAt: new Date() })
+                .where(and(eq(habits.id, id), eq(habits.userId, req.user.id)))
+                .returning();
+
+            if (!updatedHabit) {
+                return res.status(401).end();
+            }
+
+            if (tagIds !== undefined) {
+                await tx.delete(habitTags).where(eq(habitTags.habitId, id));
+
+                if (tagIds.length > 0) {
+                    const habitTagValues = tagIds.map((tagId: string) => ({
+                        habitId: id,
+                        tagId,
+                    }));
+
+                    await tx.insert(habitTags).values(habitTagValues);
+                }
+            }
+
+            return updatedHabit;
+        });
+
+        res.json({
+            message: 'Habit updated successfully',
+            habit: result,
+        });
+    } catch (e) {
+        if (e.message === 'Habit not found') {
+            return res.status(404).json({ error: 'Habit not found' });
+        }
+        console.error('Error updating habit:', e);
+        res.status(500).json({ error: 'Failed to update habit' });
+    }
+};
