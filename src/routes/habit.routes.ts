@@ -8,7 +8,7 @@ const createHabitSchema = z.object({
     name: z.string(),
     description: z.string().optional(),
     frequency: z.string(),
-    targetCount: z.string(),
+    targetCount: z.number(),
     tagIds: z.array(z.string()).optional(),
 });
 
