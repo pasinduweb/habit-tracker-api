@@ -30,5 +30,4 @@ package-lock.json
 
 # Other
 drizzle.config.ts
-vitest.config.ts
 notes.txt
