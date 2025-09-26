@@ -154,3 +154,26 @@ export const getHabitById = async (req: AuthenticatedRequest, res: Response) => 
         res.status(500).json({ error: 'Failed to fetch habit' });
     }
 };
+
+export const deleteHabit = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user!.id;
+
+        const [deletedHabit] = await db
+            .delete(habits)
+            .where(and(eq(habits.id, id), eq(habits.userId, userId)))
+            .returning();
+
+        if (!deletedHabit) {
+            return res.status(404).json({ error: 'Habit not found' });
+        }
+
+        res.json({
+            message: 'Habit deleted successfully',
+        });
+    } catch (error) {
+        console.error('Delete habit error:', error);
+        res.status(500).json({ error: 'Failed to delete habit' });
+    }
+};
