@@ -3,7 +3,7 @@ import { defineConfig } from 'vitest/config';
 export default defineConfig({
     test: {
         globals: true,
-        globalSetup: ['./tests/setup/globalSetup.ts'],
+        globalSetup: ['./tests/setup/global-setup.ts'],
         // Automatically clean up after each test to ensure isolation
         clearMocks: true,
         restoreMocks: true,
