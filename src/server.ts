@@ -21,7 +21,7 @@ app.use(
 );
 
 app.get('/health', (req, res) => {
-    res.json({ message: 'Hello' }).status(200);
+    res.json({ message: 'ok' }).status(200);
 });
 
 app.use('/api/auth', authRoutes);
